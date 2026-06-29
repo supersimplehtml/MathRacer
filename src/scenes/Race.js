@@ -124,7 +124,7 @@ export class Race {
 
           <!-- cars -->
          <!-- Cars -->
-<img id="player" class="car" src="/playercar.png">
+<img id="player" class="car" src="/playercar2.png">
 
 <img id="ai1" class="car" src="/aicar.png">
 
