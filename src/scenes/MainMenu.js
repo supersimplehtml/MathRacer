@@ -18,7 +18,7 @@ export class MainMenu {
       <div class="bg"></div>
 
       <div class="content">
-        <h1 class="title">🏎️ Math Racer</h1>
+        <h1 class="title">🏎️ MultiPlacer</h1>
         <p class="subtitle">Learn • Race • Win</p>
 
         <button id="playBtn" class="play-btn">
