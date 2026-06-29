@@ -124,13 +124,13 @@ export class Race {
 
           <!-- cars -->
          <!-- Cars -->
-<img id="player" class="car" src="src/assets/playercar.png">
+<img id="player" class="car" src="/playercar.png">
 
-<img id="ai1" class="car" src="src/assets/aicar.png">
+<img id="ai1" class="car" src="/aicar.png">
 
-<img id="ai2" class="car" src="src/assets/aicar.png">
+<img id="ai2" class="car" src="/aicar.png">
 
-<img id="ai3" class="car" src="src/assets/aicar.png">
+<img id="ai3" class="car" src="/aicar.png">
 
           <!-- FINISH -->
           <div id="finish" style="
