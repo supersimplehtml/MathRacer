@@ -41,7 +41,7 @@ export class Race {
     const lane = this.roadHeight / 4;
 
     // Base speed
-    const BASE_SPEED = 2.2;
+    const BASE_SPEED = this.car.speed;
 
     // 🚗 Cars
     this.cars = {
