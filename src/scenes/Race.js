@@ -74,7 +74,7 @@ export class Race {
 
       ai3: {
         baseSpeed: 2.25,
-        boostSpeed: 5.7,
+        boostSpeed: 4.9,
       },
     };
 
