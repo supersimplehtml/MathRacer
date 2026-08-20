@@ -1,4 +1,4 @@
-import { CarSelect } from "./CarSelect";
+import { DifficultySelect } from "./DifficultySelect";
 
 export class MainMenu {
   constructor(sceneManager) {
@@ -36,7 +36,7 @@ export class MainMenu {
     // Better for desktop + mobile
     btn.addEventListener("click", () => {
       this.sceneManager.changeScene(
-        new CarSelect(this.sceneManager)
+        new DifficultySelect(this.sceneManager)
       );
     });
 
