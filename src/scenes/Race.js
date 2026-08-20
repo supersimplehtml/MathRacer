@@ -8,26 +8,34 @@ export class Race {
 
     this.tables = tables;
 
-    // Selected car from CarSelect
+    // Selected car
     this.car = car || {
       speed: 2.2,
       boost: 4.0,
     };
 
-    // 🛑 GAME STATE
+    // -------------------
+    // GAME STATE
+    // -------------------
     this.gameOver = false;
 
-    // 📊 STATS
+    // -------------------
+    // STATS
+    // -------------------
     this.stats = {
       startTime: null,
       correct: 0,
       wrong: 0,
     };
 
-    // 🏁 TRACK
+    // -------------------
+    // TRACK
+    // -------------------
     this.finishLine = 11000;
 
-    // 📱 RESPONSIVE SIZING
+    // -------------------
+    // RESPONSIVE SIZING
+    // -------------------
     this.scale = Math.min(window.innerWidth / 1400, 1);
 
     this.carWidth = Math.max(
@@ -42,51 +50,45 @@ export class Race {
       Math.min(320, window.innerHeight * 0.32)
     );
 
-    // 🚗 LANE POSITIONS
+    // -------------------
+    // LANE POSITIONS
+    // -------------------
     const lane = this.roadHeight / 4;
 
-    // =====================================================
-    // 🚗 PLAYER
-    // =====================================================
+    // -------------------
+    // PLAYER CAR STATS
+    // -------------------
+    this.playerBaseSpeed = Number(this.car.speed) || 2.2;
+    this.playerBoost = Number(this.car.boost) || 4.0;
 
-    const playerBaseSpeed = Number(this.car.speed) || 2.2;
-    const playerBoost = Number(this.car.boost) || 4.0;
-
-    this.playerBaseSpeed = playerBaseSpeed;
-    this.playerBoost = playerBoost;
-
-    // =====================================================
-    // 🤖 AI SETTINGS
-    // =====================================================
-
-    // Each AI has its own normal speed.
-    // Slightly different speeds make the race less predictable.
+    // -------------------
+    // AI STATS
+    // -------------------
     this.aiStats = {
       ai1: {
         baseSpeed: 2.05,
-        boostSpeed: 3,
+        boostSpeed: 4.3,
       },
 
       ai2: {
         baseSpeed: 2.15,
-        boostSpeed: 2.5,
+        boostSpeed: 4.5,
       },
 
       ai3: {
         baseSpeed: 2.25,
-        boostSpeed: 3.5,
+        boostSpeed: 4.7,
       },
     };
 
-    // =====================================================
-    // 🚗 CARS
-    // =====================================================
-
+    // -------------------
+    // CARS
+    // -------------------
     this.cars = {
       player: {
         x: 0,
         y: lane * 1.5,
-        speed: playerBaseSpeed,
+        speed: this.playerBaseSpeed,
       },
 
       ai1: {
@@ -108,30 +110,31 @@ export class Race {
       },
     };
 
-    // =====================================================
-    // 🤖 AI BOOST SYSTEM
-    // =====================================================
+    // -------------------
+    // AI BOOST SYSTEM
+    // -------------------
 
-    // First AI boost appears randomly between 5 and 13 sec.
-    this.aiNextBoost =
-      Date.now() + 5000 + Math.random() * 8000;
+    // First boost after exactly 3 seconds
+    this.aiNextBoost = Date.now() + 3000;
 
     this.activeAIBoost = null;
-
     this.aiBoostUntil = 0;
 
-    // =====================================================
-    // 🏎️ PLAYER BOOST SYSTEM
-    // =====================================================
+    // -------------------
+    // PLAYER BOOST SYSTEM
+    // -------------------
 
     this.playerBoostUntil = 0;
 
-    // =====================================================
-    // 🧠 QUESTION SYSTEM
-    // =====================================================
+    // -------------------
+    // QUESTIONS
+    // -------------------
 
     this.question = null;
     this.questionStartTime = null;
+
+    // Boost message timer
+    this.boostMessageTimer = null;
   }
 
   // =====================================================
@@ -330,10 +333,9 @@ export class Race {
 
     root.appendChild(container);
 
-    // =====================================================
+    // -------------------
     // ELEMENTS
-    // =====================================================
-
+    // -------------------
     this.el = {
       world: container.querySelector("#world"),
       player: container.querySelector("#player"),
@@ -345,10 +347,9 @@ export class Race {
       boostMessage: container.querySelector("#boostMessage"),
     };
 
-    // =====================================================
-    // CAR STYLING
-    // =====================================================
-
+    // -------------------
+    // STYLE CARS
+    // -------------------
     [
       this.el.player,
       this.el.ai1,
@@ -362,7 +363,7 @@ export class Race {
 
       car.style.objectFit = "contain";
 
-      // Images point upward, rotate to face right.
+      // Images point upward, rotate them right.
       car.style.transform =
         "translate(-50%, -50%) rotate(90deg)";
 
@@ -373,30 +374,27 @@ export class Race {
       car.draggable = false;
     });
 
-    // =====================================================
+    // -------------------
     // FIRST QUESTION
-    // =====================================================
-
+    // -------------------
     this.nextQuestion();
 
-    // =====================================================
+    // -------------------
     // COUNTDOWN
-    // =====================================================
-
+    // -------------------
     this.startCountdown(() => {
       this.stats.startTime = Date.now();
 
-      // Reset AI boost timer after countdown
-      this.aiNextBoost =
-        Date.now() + 5000 + Math.random() * 8000;
+      // Make sure the first boost is exactly
+      // 3 seconds after GO.
+      this.aiNextBoost = Date.now() + 3000;
 
       this.loop();
     });
 
-    // =====================================================
+    // -------------------
     // RESIZE
-    // =====================================================
-
+    // -------------------
     window.addEventListener("resize", () => {
       this.scale = Math.min(
         window.innerWidth / 1400,
@@ -498,19 +496,17 @@ export class Race {
 
     const now = Date.now();
 
-    // ===================================================
-    // MOVE CARS
-    // ===================================================
-
+    // -------------------
+    // MOVE
+    // -------------------
     this.move(this.cars.player);
     this.move(this.cars.ai1);
     this.move(this.cars.ai2);
     this.move(this.cars.ai3);
 
-    // ===================================================
-    // 🤖 RANDOM AI BOOST
-    // ===================================================
-
+    // -------------------
+    // START AI BOOST
+    // -------------------
     if (
       !this.activeAIBoost &&
       now >= this.aiNextBoost
@@ -518,10 +514,9 @@ export class Race {
       this.startAIBoost(now);
     }
 
-    // ===================================================
-    // 🤖 END AI BOOST
-    // ===================================================
-
+    // -------------------
+    // END AI BOOST
+    // -------------------
     if (
       this.activeAIBoost &&
       now >= this.aiBoostUntil
@@ -529,7 +524,6 @@ export class Race {
       const aiName =
         this.activeAIBoost;
 
-      // Restore ONLY the AI that was boosted.
       this.cars[aiName].speed =
         this.aiStats[aiName].baseSpeed;
 
@@ -538,17 +532,16 @@ export class Race {
 
       this.hideBoostMessage();
 
-      // Next boost after another random delay.
+      // Next boost in 5–8 seconds.
       this.aiNextBoost =
         now +
-        7000 +
-        Math.random() * 8000;
+        5000 +
+        Math.random() * 3000;
     }
 
-    // ===================================================
-    // 🏎️ END PLAYER BOOST
-    // ===================================================
-
+    // -------------------
+    // END PLAYER BOOST
+    // -------------------
     if (
       this.playerBoostUntil &&
       now >= this.playerBoostUntil
@@ -559,22 +552,20 @@ export class Race {
       this.playerBoostUntil = 0;
     }
 
-    // ===================================================
+    // -------------------
     // RENDER
-    // ===================================================
-
+    // -------------------
     this.renderPositions();
     this.renderCamera();
 
-    // ===================================================
+    // -------------------
     // WIN CHECK
-    // ===================================================
-
+    // -------------------
     this.checkWin();
   }
 
   // =====================================================
-  // AI BOOST
+  // START AI BOOST
   // =====================================================
 
   startAIBoost(now) {
@@ -584,21 +575,22 @@ export class Race {
       "ai3",
     ];
 
-    // Random AI
+    // Pick random AI.
     const chosenAI =
       aiNames[
         Math.floor(
-          Math.random() * aiNames.length
+          Math.random() *
+            aiNames.length
         )
       ];
 
     this.activeAIBoost = chosenAI;
 
-    // Give selected AI its boost.
+    // Apply boost.
     this.cars[chosenAI].speed =
       this.aiStats[chosenAI].boostSpeed;
 
-    // Random duration between 2 and 4 sec.
+    // Boost lasts 2–4 seconds.
     const duration =
       2000 +
       Math.random() * 2000;
@@ -606,7 +598,7 @@ export class Race {
     this.aiBoostUntil =
       now + duration;
 
-    // Show warning.
+    // Warning.
     this.showBoostMessage(
       `⚠️ ${chosenAI.toUpperCase()} BOOST!`
     );
@@ -623,7 +615,9 @@ export class Race {
 
     this.el.boostMessage.style.opacity = "1";
 
-    clearTimeout(this.boostMessageTimer);
+    clearTimeout(
+      this.boostMessageTimer
+    );
 
     this.boostMessageTimer =
       setTimeout(() => {
@@ -763,8 +757,7 @@ export class Race {
   answer(val) {
     if (this.gameOver) return;
 
-    // Prevent multiple clicks from answering
-    // the same question more than once.
+    // Prevent multiple clicks.
     const buttons =
       this.el.options.querySelectorAll(
         "button"
@@ -780,16 +773,18 @@ export class Race {
       1000;
 
     // ===================================================
-    // ✅ CORRECT
+    // CORRECT
     // ===================================================
 
-    if (val === this.question.correct) {
+    if (
+      val === this.question.correct
+    ) {
       this.stats.correct++;
 
       let boostAmount;
       let duration;
 
-      // 🚀 UNDER 1 SECOND
+      // UNDER 1 SECOND
       if (reactionTime <= 1) {
         boostAmount =
           this.playerBoost * 1.0;
@@ -797,7 +792,7 @@ export class Race {
         duration = 1000;
       }
 
-      // 🔥 1–2 SECONDS
+      // 1–2 SECONDS
       else if (reactionTime <= 2) {
         boostAmount =
           this.playerBoost * 0.82;
@@ -805,7 +800,7 @@ export class Race {
         duration = 900;
       }
 
-      // ⚡ 2–3 SECONDS
+      // 2–3 SECONDS
       else if (reactionTime <= 3) {
         boostAmount =
           this.playerBoost * 0.65;
@@ -813,7 +808,7 @@ export class Race {
         duration = 800;
       }
 
-      // 👍 3–5 SECONDS
+      // 3–5 SECONDS
       else if (reactionTime <= 5) {
         boostAmount =
           this.playerBoost * 0.40;
@@ -821,7 +816,7 @@ export class Race {
         duration = 650;
       }
 
-      // 🐌 MORE THAN 5 SECONDS
+      // OVER 5 SECONDS
       else {
         boostAmount =
           this.playerBoost * 0.15;
@@ -829,7 +824,7 @@ export class Race {
         duration = 450;
       }
 
-      // Apply boost.
+      // Apply player boost.
       this.cars.player.speed =
         this.playerBaseSpeed +
         boostAmount;
@@ -837,20 +832,18 @@ export class Race {
       this.playerBoostUntil =
         Date.now() + duration;
 
-      // Quick visual feedback.
       this.showBoostMessage(
         `⚡ +${boostAmount.toFixed(1)} SPEED`
       );
     }
 
     // ===================================================
-    // ❌ WRONG
+    // WRONG
     // ===================================================
 
     else {
       this.stats.wrong++;
 
-      // Wrong answer slows you down.
       this.cars.player.speed =
         Math.max(
           1.0,
@@ -865,10 +858,7 @@ export class Race {
       );
     }
 
-    // ===================================================
-    // NEXT QUESTION
-    // ===================================================
-
+    // Next question.
     this.nextQuestion();
   }
 
@@ -978,9 +968,9 @@ export class Race {
       );
     };
 
-    // ===================================================
+    // -------------------
     // PLAYER WINS
-    // ===================================================
+    // -------------------
 
     if (
       this.cars.player.x >=
@@ -990,9 +980,9 @@ export class Race {
       return;
     }
 
-    // ===================================================
+    // -------------------
     // AI WINS
-    // ===================================================
+    // -------------------
 
     if (
       this.cars.ai1.x >=
