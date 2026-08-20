@@ -8,7 +8,17 @@ export class Race {
 
     this.tables = tables;
 
+    // -------------------
+    // DIFFICULTY
+    // -------------------
+    // Easy = old AI behavior
+    // Medium = moderate AI boosts
+    // Hard = aggressive AI boosts
+    this.difficulty = this.sceneManager.difficulty || "easy";
+
+    // -------------------
     // Selected car
+    // -------------------
     this.car = car || {
       speed: 2.2,
       boost: 4.0,
@@ -114,11 +124,19 @@ export class Race {
     // AI BOOST SYSTEM
     // -------------------
 
-    // First boost after exactly 3 seconds
-    this.aiNextBoost = Date.now() + 3000;
-
     this.activeAIBoost = null;
     this.aiBoostUntil = 0;
+
+    // Easy = effectively disabled
+    // Medium = first boost after 6 seconds
+    // Hard = first boost after 3 seconds
+    if (this.difficulty === "hard") {
+      this.aiNextBoost = Date.now() + 3000;
+    } else if (this.difficulty === "medium") {
+      this.aiNextBoost = Date.now() + 6000;
+    } else {
+      this.aiNextBoost = Infinity;
+    }
 
     // -------------------
     // PLAYER BOOST SYSTEM
@@ -133,7 +151,10 @@ export class Race {
     this.question = null;
     this.questionStartTime = null;
 
-    // Boost message timer
+    // -------------------
+    // BOOST MESSAGE
+    // -------------------
+
     this.boostMessageTimer = null;
   }
 
@@ -296,8 +317,7 @@ export class Race {
             0 0 10px #ffae00,
             0 0 20px #ffae00,
             3px 3px 0 #000;
-        ">
-        </h1>
+        "></h1>
 
         <!-- ANSWERS -->
         <div id="options" style="
@@ -327,8 +347,7 @@ export class Race {
         z-index:500;
         transition:opacity 0.2s;
         text-align:center;
-      ">
-      </div>
+      "></div>
     `;
 
     root.appendChild(container);
@@ -336,6 +355,7 @@ export class Race {
     // -------------------
     // ELEMENTS
     // -------------------
+
     this.el = {
       world: container.querySelector("#world"),
       player: container.querySelector("#player"),
@@ -350,6 +370,7 @@ export class Race {
     // -------------------
     // STYLE CARS
     // -------------------
+
     [
       this.el.player,
       this.el.ai1,
@@ -363,7 +384,6 @@ export class Race {
 
       car.style.objectFit = "contain";
 
-      // Images point upward, rotate them right.
       car.style.transform =
         "translate(-50%, -50%) rotate(90deg)";
 
@@ -377,17 +397,24 @@ export class Race {
     // -------------------
     // FIRST QUESTION
     // -------------------
+
     this.nextQuestion();
 
     // -------------------
     // COUNTDOWN
     // -------------------
+
     this.startCountdown(() => {
       this.stats.startTime = Date.now();
 
-      // Make sure the first boost is exactly
-      // 3 seconds after GO.
-      this.aiNextBoost = Date.now() + 3000;
+      // Set the first AI boost based on difficulty.
+      if (this.difficulty === "hard") {
+        this.aiNextBoost = Date.now() + 3000;
+      } else if (this.difficulty === "medium") {
+        this.aiNextBoost = Date.now() + 6000;
+      } else {
+        this.aiNextBoost = Infinity;
+      }
 
       this.loop();
     });
@@ -395,6 +422,7 @@ export class Race {
     // -------------------
     // RESIZE
     // -------------------
+
     window.addEventListener("resize", () => {
       this.scale = Math.min(
         window.innerWidth / 1400,
@@ -499,6 +527,7 @@ export class Race {
     // -------------------
     // MOVE
     // -------------------
+
     this.move(this.cars.player);
     this.move(this.cars.ai1);
     this.move(this.cars.ai2);
@@ -507,7 +536,9 @@ export class Race {
     // -------------------
     // START AI BOOST
     // -------------------
+
     if (
+      this.difficulty !== "easy" &&
       !this.activeAIBoost &&
       now >= this.aiNextBoost
     ) {
@@ -517,6 +548,7 @@ export class Race {
     // -------------------
     // END AI BOOST
     // -------------------
+
     if (
       this.activeAIBoost &&
       now >= this.aiBoostUntil
@@ -532,16 +564,28 @@ export class Race {
 
       this.hideBoostMessage();
 
-      // Next boost in 5–8 seconds.
-      this.aiNextBoost =
-        now +
-        5000 +
-        Math.random() * 3000;
+      // Schedule next boost according to difficulty.
+      if (this.difficulty === "hard") {
+        // Hard: 5–8 seconds
+        this.aiNextBoost =
+          now +
+          5000 +
+          Math.random() * 3000;
+      } else if (this.difficulty === "medium") {
+        // Medium: 8–12 seconds
+        this.aiNextBoost =
+          now +
+          8000 +
+          Math.random() * 4000;
+      } else {
+        this.aiNextBoost = Infinity;
+      }
     }
 
     // -------------------
     // END PLAYER BOOST
     // -------------------
+
     if (
       this.playerBoostUntil &&
       now >= this.playerBoostUntil
@@ -555,12 +599,14 @@ export class Race {
     // -------------------
     // RENDER
     // -------------------
+
     this.renderPositions();
     this.renderCamera();
 
     // -------------------
     // WIN CHECK
     // -------------------
+
     this.checkWin();
   }
 
@@ -586,19 +632,48 @@ export class Race {
 
     this.activeAIBoost = chosenAI;
 
-    // Apply boost.
-    this.cars[chosenAI].speed =
-      this.aiStats[chosenAI].boostSpeed;
+    let boostSpeed;
+    let duration;
 
-    // Boost lasts 2–4 seconds.
-    const duration =
-      2000 +
-      Math.random() * 2000;
+    // -------------------
+    // HARD
+    // -------------------
+
+    if (this.difficulty === "hard") {
+      boostSpeed =
+        this.aiStats[chosenAI].boostSpeed;
+
+      // 2–4 seconds
+      duration =
+        2000 +
+        Math.random() * 2000;
+    }
+
+    // -------------------
+    // MEDIUM
+    // -------------------
+
+    else {
+      // Medium gets a smaller boost.
+      boostSpeed =
+        this.aiStats[chosenAI].baseSpeed +
+        (
+          this.aiStats[chosenAI].boostSpeed -
+          this.aiStats[chosenAI].baseSpeed
+        ) * 0.55;
+
+      // 1.5–2.5 seconds
+      duration =
+        1500 +
+        Math.random() * 1000;
+    }
+
+    this.cars[chosenAI].speed =
+      boostSpeed;
 
     this.aiBoostUntil =
       now + duration;
 
-    // Warning.
     this.showBoostMessage(
       `⚠️ ${chosenAI.toUpperCase()} BOOST!`
     );
@@ -886,7 +961,7 @@ export class Race {
         ? Math.round(
             (this.stats.correct /
               total) *
-              100
+            100
           )
         : 0;
 
