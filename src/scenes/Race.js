@@ -57,21 +57,29 @@ export class Race {
 
     this.carWidth = Math.max(
       40,
-      Math.min(65, window.innerWidth * 0.045)
+      Math.min(
+        65,
+        window.innerWidth * 0.045
+      )
     );
 
-    this.carHeight = this.carWidth * 1.6;
+    this.carHeight =
+      this.carWidth * 1.6;
 
     this.roadHeight = Math.max(
       220,
-      Math.min(320, window.innerHeight * 0.32)
+      Math.min(
+        320,
+        window.innerHeight * 0.32
+      )
     );
 
     // =====================================================
     // LANE POSITIONS
     // =====================================================
 
-    const lane = this.roadHeight / 4;
+    const lane =
+      this.roadHeight / 4;
 
     // =====================================================
     // PLAYER STATS
@@ -102,10 +110,6 @@ export class Race {
         aiBoostDurationMax: 0,
 
         wrongAnswerSlowdown: false,
-
-        // Easy still gives a player boost,
-        // but there is no time pressure.
-        playerBoostEnabled: true,
       },
 
       medium: {
@@ -113,20 +117,16 @@ export class Race {
 
         aiBoostEnabled: true,
 
-        // First boost after 7-10 seconds.
         aiBoostMinDelay: 7000,
         aiBoostMaxDelay: 10000,
 
-        // Small boost.
+        // Small AI boost.
         aiBoostAmount: 0.65,
 
-        // Short boost.
         aiBoostDurationMin: 900,
         aiBoostDurationMax: 1400,
 
         wrongAnswerSlowdown: true,
-
-        playerBoostEnabled: true,
       },
 
       hard: {
@@ -134,25 +134,23 @@ export class Race {
 
         aiBoostEnabled: true,
 
-        // First boost after 4-6 seconds.
         aiBoostMinDelay: 4000,
         aiBoostMaxDelay: 6000,
 
-        // Larger, but still controlled.
+        // Large, but controlled.
         aiBoostAmount: 1.15,
 
-        // 1.3-2 seconds.
         aiBoostDurationMin: 1300,
         aiBoostDurationMax: 2000,
 
         wrongAnswerSlowdown: true,
-
-        playerBoostEnabled: true,
       },
     };
 
     this.settings =
-      this.difficultySettings[this.difficulty] ||
+      this.difficultySettings[
+        this.difficulty
+      ] ||
       this.difficultySettings.easy;
 
     // =====================================================
@@ -161,15 +159,18 @@ export class Race {
 
     this.aiStats = {
       ai1: {
-        baseSpeed: this.settings.aiBaseSpeeds[0],
+        baseSpeed:
+          this.settings.aiBaseSpeeds[0],
       },
 
       ai2: {
-        baseSpeed: this.settings.aiBaseSpeeds[1],
+        baseSpeed:
+          this.settings.aiBaseSpeeds[1],
       },
 
       ai3: {
-        baseSpeed: this.settings.aiBaseSpeeds[2],
+        baseSpeed:
+          this.settings.aiBaseSpeeds[2],
       },
     };
 
@@ -181,25 +182,29 @@ export class Race {
       player: {
         x: 0,
         y: lane * 1.5,
-        speed: this.playerBaseSpeed,
+        speed:
+          this.playerBaseSpeed,
       },
 
       ai1: {
         x: 0,
         y: lane * 0.5,
-        speed: this.aiStats.ai1.baseSpeed,
+        speed:
+          this.aiStats.ai1.baseSpeed,
       },
 
       ai2: {
         x: 0,
         y: lane * 2.5,
-        speed: this.aiStats.ai2.baseSpeed,
+        speed:
+          this.aiStats.ai2.baseSpeed,
       },
 
       ai3: {
         x: 0,
         y: lane * 3.5,
-        speed: this.aiStats.ai3.baseSpeed,
+        speed:
+          this.aiStats.ai3.baseSpeed,
       },
     };
 
@@ -210,7 +215,9 @@ export class Race {
     this.activeAIBoost = null;
     this.aiBoostUntil = 0;
 
-    if (this.settings.aiBoostEnabled) {
+    if (
+      this.settings.aiBoostEnabled
+    ) {
       this.aiNextBoost =
         Date.now() +
         this.randomBetween(
@@ -218,7 +225,8 @@ export class Race {
           this.settings.aiBoostMaxDelay
         );
     } else {
-      this.aiNextBoost = Infinity;
+      this.aiNextBoost =
+        Infinity;
     }
 
     // =====================================================
@@ -248,7 +256,8 @@ export class Race {
   randomBetween(min, max) {
     return (
       min +
-      Math.random() * (max - min)
+      Math.random() *
+        (max - min)
     );
   }
 
@@ -262,26 +271,31 @@ export class Race {
     const container =
       document.createElement("div");
 
-    container.style.width = "100vw";
-    container.style.height = "100vh";
-    container.style.overflow = "hidden";
-    container.style.background = "#111";
-    container.style.fontFamily = "Arial";
-    container.style.position = "relative";
+    Object.assign(
+      container.style,
+      {
+        width: "100vw",
+        height: "100vh",
+        overflow: "hidden",
+        background: "#111",
+        fontFamily: "Arial",
+        position: "relative",
+      }
+    );
 
     container.innerHTML = `
-      <!-- WORLD -->
-
       <div id="world" style="
         position:absolute;
         top:0;
         left:0;
         width:12000px;
         height:100vh;
-        background:linear-gradient(#3cb043,#2e8b57);
+        background:
+          linear-gradient(
+            #3cb043,
+            #2e8b57
+          );
       ">
-
-        <!-- ROAD -->
 
         <div id="track" style="
           position:absolute;
@@ -295,63 +309,56 @@ export class Race {
           border-bottom:5px solid white;
         ">
 
-          <!-- LANE 1 -->
-
           <div style="
             position:absolute;
             top:${this.roadHeight * 0.25}px;
             width:100%;
             height:2px;
-            background:repeating-linear-gradient(
-              90deg,
-              white,
-              white 20px,
-              transparent 20px,
-              transparent 40px
-            );
+            background:
+              repeating-linear-gradient(
+                90deg,
+                white,
+                white 20px,
+                transparent 20px,
+                transparent 40px
+              );
           "></div>
-
-          <!-- LANE 2 -->
 
           <div style="
             position:absolute;
             top:${this.roadHeight * 0.5}px;
             width:100%;
             height:2px;
-            background:repeating-linear-gradient(
-              90deg,
-              white,
-              white 20px,
-              transparent 20px,
-              transparent 40px
-            );
+            background:
+              repeating-linear-gradient(
+                90deg,
+                white,
+                white 20px,
+                transparent 20px,
+                transparent 40px
+              );
           "></div>
-
-          <!-- LANE 3 -->
 
           <div style="
             position:absolute;
             top:${this.roadHeight * 0.75}px;
             width:100%;
             height:2px;
-            background:repeating-linear-gradient(
-              90deg,
-              white,
-              white 20px,
-              transparent 20px,
-              transparent 40px
-            );
+            background:
+              repeating-linear-gradient(
+                90deg,
+                white,
+                white 20px,
+                transparent 20px,
+                transparent 40px
+              );
           "></div>
-
-          <!-- PLAYER -->
 
           <img
             id="player"
             class="car"
             src="/playercar2.png"
           >
-
-          <!-- AI -->
 
           <img
             id="ai1"
@@ -371,8 +378,6 @@ export class Race {
             src="/aicar.png"
           >
 
-          <!-- FINISH -->
-
           <div id="finish" style="
             position:absolute;
             top:50%;
@@ -387,13 +392,14 @@ export class Race {
               30,
               this.scale * 40
             )}px;
-            background:repeating-linear-gradient(
-              45deg,
-              white,
-              white 10px,
-              black 10px,
-              black 20px
-            );
+            background:
+              repeating-linear-gradient(
+                45deg,
+                white,
+                white 10px,
+                black 10px,
+                black 20px
+              );
             display:flex;
             align-items:center;
             justify-content:center;
@@ -402,25 +408,25 @@ export class Race {
         </div>
       </div>
 
-      <!-- HUD -->
-
       <div style="
         position:absolute;
         bottom:0;
         left:0;
         width:100%;
-        background:rgba(0,0,0,0.92);
+        background:
+          rgba(0,0,0,0.92);
         color:white;
-        padding:clamp(12px,3vw,30px);
+        padding:
+          clamp(12px,3vw,30px);
         box-sizing:border-box;
         text-align:center;
       ">
 
-        <!-- QUESTION -->
-
         <h1 id="qbox" style="
-          margin:0 0 25px 0;
-          font-size:clamp(28px,5vw,60px);
+          margin:
+            0 0 25px 0;
+          font-size:
+            clamp(28px,5vw,60px);
           font-weight:900;
           letter-spacing:2px;
           color:#FFD700;
@@ -430,25 +436,24 @@ export class Race {
             3px 3px 0 #000;
         "></h1>
 
-        <!-- ANSWERS -->
-
         <div id="options" style="
           display:flex;
           justify-content:center;
-          gap:clamp(10px,2vw,20px);
+          gap:
+            clamp(10px,2vw,20px);
           flex-wrap:wrap;
         "></div>
 
       </div>
 
-      <!-- BOOST MESSAGE -->
-
       <div id="boostMessage" style="
         position:absolute;
         top:12%;
         left:50%;
-        transform:translateX(-50%);
-        font-size:clamp(24px,4vw,50px);
+        transform:
+          translateX(-50%);
+        font-size:
+          clamp(24px,4vw,50px);
         font-weight:900;
         color:#ffdd00;
         text-shadow:
@@ -458,31 +463,64 @@ export class Race {
         opacity:0;
         pointer-events:none;
         z-index:500;
-        transition:opacity 0.2s;
+        transition:
+          opacity 0.2s;
         text-align:center;
       "></div>
     `;
 
-    root.appendChild(container);
+    root.appendChild(
+      container
+    );
 
     // =====================================================
     // ELEMENTS
     // =====================================================
 
     this.el = {
-      world: container.querySelector("#world"),
-      player: container.querySelector("#player"),
-      ai1: container.querySelector("#ai1"),
-      ai2: container.querySelector("#ai2"),
-      ai3: container.querySelector("#ai3"),
-      qbox: container.querySelector("#qbox"),
-      options: container.querySelector("#options"),
+      world:
+        container.querySelector(
+          "#world"
+        ),
+
+      player:
+        container.querySelector(
+          "#player"
+        ),
+
+      ai1:
+        container.querySelector(
+          "#ai1"
+        ),
+
+      ai2:
+        container.querySelector(
+          "#ai2"
+        ),
+
+      ai3:
+        container.querySelector(
+          "#ai3"
+        ),
+
+      qbox:
+        container.querySelector(
+          "#qbox"
+        ),
+
+      options:
+        container.querySelector(
+          "#options"
+        ),
+
       boostMessage:
-        container.querySelector("#boostMessage"),
+        container.querySelector(
+          "#boostMessage"
+        ),
     };
 
     // =====================================================
-    // STYLE CARS
+    // CAR STYLING
     // =====================================================
 
     [
@@ -491,7 +529,8 @@ export class Race {
       this.el.ai2,
       this.el.ai3,
     ].forEach((car) => {
-      car.style.position = "absolute";
+      car.style.position =
+        "absolute";
 
       car.style.width =
         this.carWidth + "px";
@@ -499,7 +538,8 @@ export class Race {
       car.style.height =
         this.carHeight + "px";
 
-      car.style.objectFit = "contain";
+      car.style.objectFit =
+        "contain";
 
       car.style.transform =
         "translate(-50%, -50%) rotate(90deg)";
@@ -507,7 +547,8 @@ export class Race {
       car.style.transformOrigin =
         "center center";
 
-      car.style.userSelect = "none";
+      car.style.userSelect =
+        "none";
 
       car.draggable = false;
     });
@@ -526,10 +567,9 @@ export class Race {
       this.stats.startTime =
         Date.now();
 
-      // Recalculate AI boost timing
-      // after countdown finishes.
-
-      if (this.settings.aiBoostEnabled) {
+      if (
+        this.settings.aiBoostEnabled
+      ) {
         this.aiNextBoost =
           Date.now() +
           this.randomBetween(
@@ -537,7 +577,8 @@ export class Race {
             this.settings.aiBoostMaxDelay
           );
       } else {
-        this.aiNextBoost = Infinity;
+        this.aiNextBoost =
+          Infinity;
       }
 
       this.loop();
@@ -547,40 +588,43 @@ export class Race {
     // RESIZE
     // =====================================================
 
+    this.resizeHandler = () => {
+      this.scale =
+        Math.min(
+          window.innerWidth / 1400,
+          1
+        );
+
+      this.carWidth =
+        Math.max(
+          40,
+          Math.min(
+            65,
+            window.innerWidth *
+              0.045
+          )
+        );
+
+      this.carHeight =
+        this.carWidth * 1.6;
+
+      [
+        this.el.player,
+        this.el.ai1,
+        this.el.ai2,
+        this.el.ai3,
+      ].forEach((car) => {
+        car.style.width =
+          this.carWidth + "px";
+
+        car.style.height =
+          this.carHeight + "px";
+      });
+    };
+
     window.addEventListener(
       "resize",
-      () => {
-        this.scale =
-          Math.min(
-            window.innerWidth / 1400,
-            1
-          );
-
-        this.carWidth =
-          Math.max(
-            40,
-            Math.min(
-              65,
-              window.innerWidth * 0.045
-            )
-          );
-
-        this.carHeight =
-          this.carWidth * 1.6;
-
-        [
-          this.el.player,
-          this.el.ai1,
-          this.el.ai2,
-          this.el.ai3,
-        ].forEach((car) => {
-          car.style.width =
-            this.carWidth + "px";
-
-          car.style.height =
-            this.carHeight + "px";
-        });
-      }
+      this.resizeHandler
     );
   }
 
@@ -590,40 +634,30 @@ export class Race {
 
   startCountdown(callback) {
     const overlay =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
-    overlay.style.position =
-      "absolute";
-
-    overlay.style.top = "0";
-    overlay.style.left = "0";
-
-    overlay.style.width = "100vw";
-    overlay.style.height = "100vh";
-
-    overlay.style.display =
-      "flex";
-
-    overlay.style.alignItems =
-      "center";
-
-    overlay.style.justifyContent =
-      "center";
-
-    overlay.style.fontSize =
-      "clamp(70px,18vw,140px)";
-
-    overlay.style.fontWeight =
-      "900";
-
-    overlay.style.color =
-      "white";
-
-    overlay.style.background =
-      "rgba(0,0,0,0.6)";
-
-    overlay.style.zIndex =
-      "999";
+    Object.assign(
+      overlay.style,
+      {
+        position: "absolute",
+        top: "0",
+        left: "0",
+        width: "100vw",
+        height: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize:
+          "clamp(70px,18vw,140px)",
+        fontWeight: "900",
+        color: "white",
+        background:
+          "rgba(0,0,0,0.6)",
+        zIndex: "999",
+      }
+    );
 
     document.body.appendChild(
       overlay
@@ -640,7 +674,9 @@ export class Race {
           overlay.innerText =
             "GO!";
         } else {
-          clearInterval(interval);
+          clearInterval(
+            interval
+          );
 
           overlay.remove();
 
@@ -649,6 +685,9 @@ export class Race {
 
         count--;
       }, 1000);
+
+    this.countdownInterval =
+      interval;
   }
 
   // =====================================================
@@ -660,7 +699,10 @@ export class Race {
       this.update();
 
       if (!this.gameOver) {
-        requestAnimationFrame(tick);
+        this.animationFrame =
+          requestAnimationFrame(
+            tick
+          );
       }
     };
 
@@ -672,19 +714,29 @@ export class Race {
   // =====================================================
 
   update() {
-    if (this.gameOver) return;
+    if (this.gameOver) {
+      return;
+    }
 
     const now = Date.now();
 
-    // ===================================================
-    // MOVE
-    // ===================================================
+    // Move cars.
 
-    this.move(this.cars.player);
+    this.move(
+      this.cars.player
+    );
 
-    this.move(this.cars.ai1);
-    this.move(this.cars.ai2);
-    this.move(this.cars.ai3);
+    this.move(
+      this.cars.ai1
+    );
+
+    this.move(
+      this.cars.ai2
+    );
+
+    this.move(
+      this.cars.ai3
+    );
 
     // ===================================================
     // START AI BOOST
@@ -709,29 +761,25 @@ export class Race {
       const aiName =
         this.activeAIBoost;
 
-      // Return to normal speed.
-
       this.cars[aiName].speed =
-        this.aiStats[aiName].baseSpeed;
+        this.aiStats[
+          aiName
+        ].baseSpeed;
 
-      this.activeAIBoost = null;
-      this.aiBoostUntil = 0;
+      this.activeAIBoost =
+        null;
+
+      this.aiBoostUntil =
+        0;
 
       this.hideBoostMessage();
 
-      // Schedule another boost.
-
-      if (this.settings.aiBoostEnabled) {
-        this.aiNextBoost =
-          now +
-          this.randomBetween(
-            this.settings.aiBoostMinDelay,
-            this.settings.aiBoostMaxDelay
-          );
-      } else {
-        this.aiNextBoost =
-          Infinity;
-      }
+      this.aiNextBoost =
+        now +
+        this.randomBetween(
+          this.settings.aiBoostMinDelay,
+          this.settings.aiBoostMaxDelay
+        );
     }
 
     // ===================================================
@@ -740,12 +788,14 @@ export class Race {
 
     if (
       this.playerBoostUntil &&
-      now >= this.playerBoostUntil
+      now >=
+        this.playerBoostUntil
     ) {
       this.cars.player.speed =
         this.playerBaseSpeed;
 
-      this.playerBoostUntil = 0;
+      this.playerBoostUntil =
+        0;
     }
 
     // ===================================================
@@ -764,7 +814,7 @@ export class Race {
   }
 
   // =====================================================
-  // START AI BOOST
+  // AI BOOST
   // =====================================================
 
   startAIBoost(now) {
@@ -774,13 +824,11 @@ export class Race {
       "ai3",
     ];
 
-    // Choose a random AI.
-
     const chosenAI =
       aiNames[
         Math.floor(
           Math.random() *
-          aiNames.length
+            aiNames.length
         )
       ];
 
@@ -792,25 +840,17 @@ export class Race {
         chosenAI
       ].baseSpeed;
 
-    // ===================================================
-    // BOOST AMOUNT
-    // ===================================================
-
     const boostSpeed =
       baseSpeed +
       this.settings.aiBoostAmount;
 
-    // ===================================================
-    // BOOST DURATION
-    // ===================================================
-
     const duration =
       this.randomBetween(
-        this.settings.aiBoostDurationMin,
-        this.settings.aiBoostDurationMax
+        this.settings
+          .aiBoostDurationMin,
+        this.settings
+          .aiBoostDurationMax
       );
-
-    // Apply boost.
 
     this.cars[chosenAI].speed =
       boostSpeed;
@@ -828,7 +868,9 @@ export class Race {
   // =====================================================
 
   showBoostMessage(text) {
-    if (!this.el.boostMessage) {
+    if (
+      !this.el.boostMessage
+    ) {
       return;
     }
 
@@ -849,7 +891,9 @@ export class Race {
   }
 
   hideBoostMessage() {
-    if (!this.el.boostMessage) {
+    if (
+      !this.el.boostMessage
+    ) {
       return;
     }
 
@@ -871,7 +915,8 @@ export class Race {
 
   renderCamera() {
     const cameraOffset =
-      window.innerWidth * 0.25;
+      window.innerWidth *
+      0.25;
 
     const cameraX =
       this.cars.player.x -
@@ -917,7 +962,9 @@ export class Race {
 
   nextQuestion() {
     this.question =
-      generateQuestion(this.tables);
+      generateQuestion(
+        this.tables
+      );
 
     this.el.qbox.innerText =
       `${this.question.question} = ?`;
@@ -934,48 +981,38 @@ export class Race {
 
         btn.innerText = opt;
 
-        btn.style.width =
-          "clamp(80px,18vw,150px)";
+        Object.assign(
+          btn.style,
+          {
+            width:
+              "clamp(80px,18vw,150px)",
+            height:
+              "clamp(50px,8vw,75px)",
+            margin: "8px",
+            fontSize:
+              "clamp(20px,3vw,30px)",
+            fontWeight: "bold",
+            border: "none",
+            borderRadius: "15px",
+            background: "#2196F3",
+            color: "white",
+            cursor: "pointer",
+            transition:
+              "0.2s",
+          }
+        );
 
-        btn.style.height =
-          "clamp(50px,8vw,75px)";
+        btn.onmouseenter =
+          () => {
+            btn.style.transform =
+              "scale(1.08)";
+          };
 
-        btn.style.margin =
-          "8px";
-
-        btn.style.fontSize =
-          "clamp(20px,3vw,30px)";
-
-        btn.style.fontWeight =
-          "bold";
-
-        btn.style.border =
-          "none";
-
-        btn.style.borderRadius =
-          "15px";
-
-        btn.style.background =
-          "#2196F3";
-
-        btn.style.color =
-          "white";
-
-        btn.style.cursor =
-          "pointer";
-
-        btn.style.transition =
-          "0.2s";
-
-        btn.onmouseenter = () => {
-          btn.style.transform =
-            "scale(1.08)";
-        };
-
-        btn.onmouseleave = () => {
-          btn.style.transform =
-            "scale(1)";
-        };
+        btn.onmouseleave =
+          () => {
+            btn.style.transform =
+              "scale(1)";
+          };
 
         btn.onclick = () =>
           this.answer(opt);
@@ -985,11 +1022,6 @@ export class Race {
         );
       }
     );
-
-    // Reaction timer is used only
-    // to calculate boost strength.
-    //
-    // There is NO question timeout.
 
     this.questionStartTime =
       Date.now();
@@ -1003,8 +1035,6 @@ export class Race {
     if (this.gameOver) {
       return;
     }
-
-    // Prevent multiple clicks.
 
     const buttons =
       this.el.options.querySelectorAll(
@@ -1027,54 +1057,31 @@ export class Race {
     // ===================================================
 
     if (
-      val === this.question.correct
+      val ===
+      this.question.correct
     ) {
       this.stats.correct++;
 
-      // =================================================
+      let boostAmount;
+      let duration;
+
       // EASY
-      // =================================================
-
       if (
-        this.difficulty === "easy"
+        this.difficulty ===
+        "easy"
       ) {
-        // Easy has no time pressure.
-        // Every correct answer gets
-        // a useful player boost.
-
-        const boostAmount =
-          0.85;
-
-        const duration =
-          850;
-
-        this.cars.player.speed =
-          this.playerBaseSpeed +
-          boostAmount;
-
-        this.playerBoostUntil =
-          Date.now() +
-          duration;
-
-        this.showBoostMessage(
-          `⚡ +${boostAmount.toFixed(
-            1
-          )} SPEED`
-        );
+        boostAmount = 0.85;
+        duration = 850;
       }
 
-      // =================================================
       // MEDIUM
-      // =================================================
-
       else if (
         this.difficulty ===
         "medium"
       ) {
-        let boostAmount;
-        let duration;
-
-        if (reactionTime <= 1) {
+        if (
+          reactionTime <= 1
+        ) {
           boostAmount = 1.0;
           duration = 850;
         } else if (
@@ -1091,115 +1098,73 @@ export class Race {
           boostAmount = 0.4;
           duration = 550;
         }
-
-        this.cars.player.speed =
-          this.playerBaseSpeed +
-          boostAmount;
-
-        this.playerBoostUntil =
-          Date.now() +
-          duration;
-
-        this.showBoostMessage(
-          `⚡ +${boostAmount.toFixed(
-            1
-          )} SPEED`
-        );
       }
 
-      // =================================================
       // HARD
-      // =================================================
-
       else {
-        let boostAmount;
-        let duration;
-
-        // VERY FAST ANSWER
-
-        if (reactionTime <= 0.75) {
+        if (
+          reactionTime <=
+          0.75
+        ) {
           boostAmount = 1.35;
           duration = 950;
-        }
-
-        // FAST ANSWER
-
-        else if (
-          reactionTime <= 1.25
+        } else if (
+          reactionTime <=
+          1.25
         ) {
           boostAmount = 1.15;
           duration = 850;
-        }
-
-        // NORMAL ANSWER
-
-        else if (
+        } else if (
           reactionTime <= 2
         ) {
           boostAmount = 0.9;
           duration = 750;
-        }
-
-        // SLOW ANSWER
-
-        else if (
+        } else if (
           reactionTime <= 3
         ) {
           boostAmount = 0.65;
           duration = 650;
-        }
-
-        // VERY SLOW ANSWER
-
-        else {
+        } else {
           boostAmount = 0.4;
           duration = 500;
         }
-
-        this.cars.player.speed =
-          this.playerBaseSpeed +
-          boostAmount;
-
-        this.playerBoostUntil =
-          Date.now() +
-          duration;
-
-        this.showBoostMessage(
-          `⚡ +${boostAmount.toFixed(
-            1
-          )} SPEED`
-        );
       }
+
+      this.cars.player.speed =
+        this.playerBaseSpeed +
+        boostAmount;
+
+      this.playerBoostUntil =
+        Date.now() + duration;
+
+      this.showBoostMessage(
+        `⚡ +${boostAmount.toFixed(
+          1
+        )} SPEED`
+      );
     }
 
     // ===================================================
-    // WRONG ANSWER
+    // WRONG
     // ===================================================
 
     else {
       this.stats.wrong++;
 
-      // =================================================
-      // EASY
-      // =================================================
+      // Easy does NOT slow down.
 
       if (
-        this.difficulty === "easy"
+        this.difficulty ===
+        "easy"
       ) {
-        // NO SLOWDOWN.
-
         this.showBoostMessage(
           "❌ WRONG!"
         );
       }
 
-      // =================================================
-      // MEDIUM + HARD
-      // =================================================
+      // Medium + Hard slow down.
 
       else {
-        // Small temporary slowdown.
-
         this.cars.player.speed =
           Math.max(
             1.25,
@@ -1216,10 +1181,6 @@ export class Race {
       }
     }
 
-    // ===================================================
-    // NEXT QUESTION
-    // ===================================================
-
     this.nextQuestion();
   }
 
@@ -1232,152 +1193,173 @@ export class Race {
       return;
     }
 
-    const win = (text) => {
-      this.gameOver = true;
+    let winner = null;
 
-      const timeTaken =
-        (
-          (Date.now() -
-            this.stats.startTime) /
-          1000
-        ).toFixed(1);
-
-      const total =
-        this.stats.correct +
-        this.stats.wrong;
-
-      const accuracy =
-        total
-          ? Math.round(
-              (this.stats.correct /
-                total) *
-                100
-            )
-          : 0;
-
-      const endScreen =
-        document.createElement(
-          "div"
-        );
-
-      endScreen.style.position =
-        "absolute";
-
-      endScreen.style.top = "0";
-
-      endScreen.style.left = "0";
-
-      endScreen.style.width =
-        "100vw";
-
-      endScreen.style.height =
-        "100vh";
-
-      endScreen.style.background =
-        "#000";
-
-      endScreen.style.color =
-        "white";
-
-      endScreen.style.display =
-        "flex";
-
-      endScreen.style.flexDirection =
-        "column";
-
-      endScreen.style.alignItems =
-        "center";
-
-      endScreen.style.justifyContent =
-        "center";
-
-      endScreen.style.fontSize =
-        "28px";
-
-      endScreen.style.zIndex =
-        "1000";
-
-      endScreen.innerHTML = `
-        <h1>${text}</h1>
-
-        <p>
-          ⏱ Time: ${timeTaken}s
-        </p>
-
-        <p>
-          ✅ Correct:
-          ${this.stats.correct}
-        </p>
-
-        <p>
-          ❌ Wrong:
-          ${this.stats.wrong}
-        </p>
-
-        <p>
-          🎯 Accuracy:
-          ${accuracy}%
-        </p>
-
-        <button
-          onclick="location.reload()"
-          style="
-            margin-top:20px;
-            padding:15px 30px;
-            font-size:22px;
-            font-weight:bold;
-            border:none;
-            border-radius:12px;
-            cursor:pointer;
-          "
-        >
-          Play Again
-        </button>
-      `;
-
-      document.body.appendChild(
-        endScreen
-      );
-    };
-
-    // ===================================================
-    // PLAYER WINS
-    // ===================================================
+    // Player
 
     if (
       this.cars.player.x >=
       this.finishLine
     ) {
-      win("You Win! 🏆");
-      return;
+      winner = "player";
     }
 
-    // ===================================================
-    // AI WINS
-    // ===================================================
+    // AI 1
 
-    if (
+    else if (
       this.cars.ai1.x >=
       this.finishLine
     ) {
-      win("AI 1 Wins! 🤖");
-      return;
+      winner = "ai1";
     }
 
-    if (
+    // AI 2
+
+    else if (
       this.cars.ai2.x >=
       this.finishLine
     ) {
-      win("AI 2 Wins! 🤖");
-      return;
+      winner = "ai2";
     }
 
-    if (
+    // AI 3
+
+    else if (
       this.cars.ai3.x >=
       this.finishLine
     ) {
-      win("AI 3 Wins! 🤖");
+      winner = "ai3";
+    }
+
+    if (!winner) {
       return;
+    }
+
+    // ===================================================
+    // GAME OVER
+    // ===================================================
+
+    this.gameOver = true;
+
+    if (
+      this.animationFrame
+    ) {
+      cancelAnimationFrame(
+        this.animationFrame
+      );
+    }
+
+    // ===================================================
+    // RESULTS
+    // ===================================================
+
+    const timeTaken = (
+      (Date.now() -
+        this.stats.startTime) /
+      1000
+    ).toFixed(1);
+
+    const total =
+      this.stats.correct +
+      this.stats.wrong;
+
+    const accuracy =
+      total > 0
+        ? Math.round(
+            (this.stats.correct /
+              total) *
+              100
+          )
+        : 0;
+
+    let resultText;
+
+    if (
+      winner === "player"
+    ) {
+      resultText =
+        "YOU WIN";
+    } else if (
+      winner === "ai1"
+    ) {
+      resultText =
+        "AI 1 WINS";
+    } else if (
+      winner === "ai2"
+    ) {
+      resultText =
+        "AI 2 WINS";
+    } else {
+      resultText =
+        "AI 3 WINS";
+    }
+
+    // ===================================================
+    // SEND RESULTS TO FINISH
+    // ===================================================
+
+    this.sceneManager.changeScene(
+      new Finish(
+        this.sceneManager,
+        {
+          result: resultText,
+          winner: winner,
+          time: timeTaken,
+          correct:
+            this.stats.correct,
+          wrong:
+            this.stats.wrong,
+          accuracy:
+            accuracy,
+          difficulty:
+            this.difficulty,
+          tables:
+            this.tables,
+          car:
+            this.car,
+        }
+      )
+    );
+  }
+
+  // =====================================================
+  // DESTROY
+  // =====================================================
+
+  destroy() {
+    this.gameOver = true;
+
+    if (
+      this.animationFrame
+    ) {
+      cancelAnimationFrame(
+        this.animationFrame
+      );
+    }
+
+    if (
+      this.countdownInterval
+    ) {
+      clearInterval(
+        this.countdownInterval
+      );
+    }
+
+    clearTimeout(
+      this.boostMessageTimer
+    );
+
+    if (
+      this.resizeHandler
+    ) {
+      window.removeEventListener(
+        "resize",
+        this.resizeHandler
+      );
+    }
+
+    if (this.root) {
+      this.root.innerHTML = "";
     }
   }
 }
