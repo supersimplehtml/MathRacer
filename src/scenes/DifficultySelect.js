@@ -1,7 +1,6 @@
 import { TableSelect } from "./TableSelect";
-import { cars } from "../data/car";
 
-export class CarSelect {
+export class DifficultySelect {
   constructor(sceneManager) {
     this.sceneManager = sceneManager;
   }
@@ -27,11 +26,13 @@ export class CarSelect {
     });
 
     const title = document.createElement("h1");
-    title.innerText = "🚗 Select Your Car";
+    title.innerText = "🏁 Select Difficulty";
 
-    title.style.marginBottom = "30px";
-    title.style.fontSize = "clamp(28px,5vw,52px)";
-    title.style.textAlign = "center";
+    Object.assign(title.style, {
+      marginBottom: "35px",
+      fontSize: "clamp(28px,5vw,52px)",
+      textAlign: "center",
+    });
 
     container.appendChild(title);
 
@@ -45,21 +46,46 @@ export class CarSelect {
       maxWidth: "900px",
     });
 
-    cars.forEach((car) => {
+    const difficulties = [
+      {
+        name: "🟢 Easy",
+        difficulty: "easy",
+        description: "Relaxed racing. Perfect for learning!",
+      },
+      {
+        name: "🟡 Medium",
+        difficulty: "medium",
+        description: "A balanced challenge.",
+      },
+      {
+        name: "🔴 Hard",
+        difficulty: "hard",
+        description: "The AI gets powerful speed boosts!",
+      },
+    ];
+
+    difficulties.forEach((difficulty) => {
       const btn = document.createElement("button");
 
       btn.innerHTML = `
-        <div style="font-size:1.4rem;font-weight:bold;">
-            ${car.name}
+        <div style="
+          font-size:1.5rem;
+          font-weight:bold;
+        ">
+          ${difficulty.name}
         </div>
 
-        <div style="opacity:.8;margin-top:8px;">
-            Speed: ${car.speed}
+        <div style="
+          opacity:.8;
+          margin-top:10px;
+          font-size:1rem;
+        ">
+          ${difficulty.description}
         </div>
       `;
 
       Object.assign(btn.style, {
-        padding: "22px",
+        padding: "28px 22px",
         borderRadius: "18px",
         border: "none",
         cursor: "pointer",
@@ -67,7 +93,7 @@ export class CarSelect {
         color: "white",
         fontSize: "clamp(18px,2vw,24px)",
         transition: "0.2s",
-        minHeight: "120px",
+        minHeight: "140px",
         touchAction: "manipulation",
       });
 
@@ -82,7 +108,7 @@ export class CarSelect {
       };
 
       btn.onclick = () => {
-        this.sceneManager.selectedCar = car;
+        this.sceneManager.difficulty = difficulty.difficulty;
 
         this.sceneManager.changeScene(
           new TableSelect(this.sceneManager)
