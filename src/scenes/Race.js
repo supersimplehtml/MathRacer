@@ -64,17 +64,17 @@ export class Race {
     this.aiStats = {
       ai1: {
         baseSpeed: 2.05,
-        boostSpeed: 5.1,
+        boostSpeed: 3,
       },
 
       ai2: {
         baseSpeed: 2.15,
-        boostSpeed: 5.4,
+        boostSpeed: 2.5,
       },
 
       ai3: {
         baseSpeed: 2.25,
-        boostSpeed: 4.9,
+        boostSpeed: 3.5,
       },
     };
 
