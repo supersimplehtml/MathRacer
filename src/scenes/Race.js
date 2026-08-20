@@ -8,45 +8,52 @@ export class Race {
 
     this.tables = tables;
 
-    // -------------------
+    // =====================================================
     // DIFFICULTY
-    // -------------------
-    // Easy = old AI behavior
-    // Medium = moderate AI boosts
-    // Hard = aggressive AI boosts
-    this.difficulty = this.sceneManager.difficulty || "easy";
+    // =====================================================
 
-    // -------------------
-    // Selected car
-    // -------------------
+    this.difficulty =
+      this.sceneManager.difficulty || "easy";
+
+    // =====================================================
+    // SELECTED CAR
+    // =====================================================
+
     this.car = car || {
       speed: 2.2,
       boost: 4.0,
     };
 
-    // -------------------
+    // =====================================================
     // GAME STATE
-    // -------------------
+    // =====================================================
+
     this.gameOver = false;
 
-    // -------------------
+    // =====================================================
     // STATS
-    // -------------------
+    // =====================================================
+
     this.stats = {
       startTime: null,
       correct: 0,
       wrong: 0,
     };
 
-    // -------------------
+    // =====================================================
     // TRACK
-    // -------------------
+    // =====================================================
+
     this.finishLine = 11000;
 
-    // -------------------
+    // =====================================================
     // RESPONSIVE SIZING
-    // -------------------
-    this.scale = Math.min(window.innerWidth / 1400, 1);
+    // =====================================================
+
+    this.scale = Math.min(
+      window.innerWidth / 1400,
+      1
+    );
 
     this.carWidth = Math.max(
       40,
@@ -60,40 +67,116 @@ export class Race {
       Math.min(320, window.innerHeight * 0.32)
     );
 
-    // -------------------
+    // =====================================================
     // LANE POSITIONS
-    // -------------------
+    // =====================================================
+
     const lane = this.roadHeight / 4;
 
-    // -------------------
-    // PLAYER CAR STATS
-    // -------------------
-    this.playerBaseSpeed = Number(this.car.speed) || 2.2;
-    this.playerBoost = Number(this.car.boost) || 4.0;
+    // =====================================================
+    // PLAYER STATS
+    // =====================================================
 
-    // -------------------
-    // AI STATS
-    // -------------------
-    this.aiStats = {
-      ai1: {
-        baseSpeed: 2.05,
-        boostSpeed: 4.3,
+    this.playerBaseSpeed =
+      Number(this.car.speed) || 2.2;
+
+    this.playerBoost =
+      Number(this.car.boost) || 4.0;
+
+    // =====================================================
+    // DIFFICULTY SETTINGS
+    // =====================================================
+
+    this.difficultySettings = {
+      easy: {
+        aiBaseSpeeds: [1.75, 1.85, 1.95],
+
+        aiBoostEnabled: false,
+
+        aiBoostMinDelay: Infinity,
+        aiBoostMaxDelay: Infinity,
+
+        aiBoostAmount: 0,
+
+        aiBoostDurationMin: 0,
+        aiBoostDurationMax: 0,
+
+        wrongAnswerSlowdown: false,
+
+        // Easy still gives a player boost,
+        // but there is no time pressure.
+        playerBoostEnabled: true,
       },
 
-      ai2: {
-        baseSpeed: 2.15,
-        boostSpeed: 4.5,
+      medium: {
+        aiBaseSpeeds: [1.95, 2.05, 2.15],
+
+        aiBoostEnabled: true,
+
+        // First boost after 7-10 seconds.
+        aiBoostMinDelay: 7000,
+        aiBoostMaxDelay: 10000,
+
+        // Small boost.
+        aiBoostAmount: 0.65,
+
+        // Short boost.
+        aiBoostDurationMin: 900,
+        aiBoostDurationMax: 1400,
+
+        wrongAnswerSlowdown: true,
+
+        playerBoostEnabled: true,
       },
 
-      ai3: {
-        baseSpeed: 2.25,
-        boostSpeed: 4.7,
+      hard: {
+        aiBaseSpeeds: [2.15, 2.25, 2.35],
+
+        aiBoostEnabled: true,
+
+        // First boost after 4-6 seconds.
+        aiBoostMinDelay: 4000,
+        aiBoostMaxDelay: 6000,
+
+        // Larger, but still controlled.
+        aiBoostAmount: 1.15,
+
+        // 1.3-2 seconds.
+        aiBoostDurationMin: 1300,
+        aiBoostDurationMax: 2000,
+
+        wrongAnswerSlowdown: true,
+
+        playerBoostEnabled: true,
       },
     };
 
-    // -------------------
+    this.settings =
+      this.difficultySettings[this.difficulty] ||
+      this.difficultySettings.easy;
+
+    // =====================================================
+    // AI STATS
+    // =====================================================
+
+    this.aiStats = {
+      ai1: {
+        baseSpeed: this.settings.aiBaseSpeeds[0],
+      },
+
+      ai2: {
+        baseSpeed: this.settings.aiBaseSpeeds[1],
+      },
+
+      ai3: {
+        baseSpeed: this.settings.aiBaseSpeeds[2],
+      },
+    };
+
+    // =====================================================
     // CARS
-    // -------------------
+    // =====================================================
+
     this.cars = {
       player: {
         x: 0,
@@ -120,42 +203,53 @@ export class Race {
       },
     };
 
-    // -------------------
+    // =====================================================
     // AI BOOST SYSTEM
-    // -------------------
+    // =====================================================
 
     this.activeAIBoost = null;
     this.aiBoostUntil = 0;
 
-    // Easy = effectively disabled
-    // Medium = first boost after 6 seconds
-    // Hard = first boost after 3 seconds
-    if (this.difficulty === "hard") {
-      this.aiNextBoost = Date.now() + 3000;
-    } else if (this.difficulty === "medium") {
-      this.aiNextBoost = Date.now() + 6000;
+    if (this.settings.aiBoostEnabled) {
+      this.aiNextBoost =
+        Date.now() +
+        this.randomBetween(
+          this.settings.aiBoostMinDelay,
+          this.settings.aiBoostMaxDelay
+        );
     } else {
       this.aiNextBoost = Infinity;
     }
 
-    // -------------------
+    // =====================================================
     // PLAYER BOOST SYSTEM
-    // -------------------
+    // =====================================================
 
     this.playerBoostUntil = 0;
 
-    // -------------------
+    // =====================================================
     // QUESTIONS
-    // -------------------
+    // =====================================================
 
     this.question = null;
     this.questionStartTime = null;
 
-    // -------------------
+    // =====================================================
     // BOOST MESSAGE
-    // -------------------
+    // =====================================================
 
     this.boostMessageTimer = null;
+  }
+
+  // =====================================================
+  // RANDOM NUMBER
+  // =====================================================
+
+  randomBetween(min, max) {
+    return (
+      min +
+      Math.random() * (max - min)
+    );
   }
 
   // =====================================================
@@ -165,7 +259,8 @@ export class Race {
   render(root) {
     this.root = root;
 
-    const container = document.createElement("div");
+    const container =
+      document.createElement("div");
 
     container.style.width = "100vw";
     container.style.height = "100vh";
@@ -176,6 +271,7 @@ export class Race {
 
     container.innerHTML = `
       <!-- WORLD -->
+
       <div id="world" style="
         position:absolute;
         top:0;
@@ -186,6 +282,7 @@ export class Race {
       ">
 
         <!-- ROAD -->
+
         <div id="track" style="
           position:absolute;
           top:50%;
@@ -199,6 +296,7 @@ export class Race {
         ">
 
           <!-- LANE 1 -->
+
           <div style="
             position:absolute;
             top:${this.roadHeight * 0.25}px;
@@ -214,6 +312,7 @@ export class Race {
           "></div>
 
           <!-- LANE 2 -->
+
           <div style="
             position:absolute;
             top:${this.roadHeight * 0.5}px;
@@ -229,6 +328,7 @@ export class Race {
           "></div>
 
           <!-- LANE 3 -->
+
           <div style="
             position:absolute;
             top:${this.roadHeight * 0.75}px;
@@ -244,6 +344,7 @@ export class Race {
           "></div>
 
           <!-- PLAYER -->
+
           <img
             id="player"
             class="car"
@@ -251,6 +352,7 @@ export class Race {
           >
 
           <!-- AI -->
+
           <img
             id="ai1"
             class="car"
@@ -270,14 +372,21 @@ export class Race {
           >
 
           <!-- FINISH -->
+
           <div id="finish" style="
             position:absolute;
             top:50%;
             transform:translateY(-50%);
             left:11000px;
-            width:${Math.max(50, this.scale * 80)}px;
+            width:${Math.max(
+              50,
+              this.scale * 80
+            )}px;
             height:${this.roadHeight}px;
-            font-size:${Math.max(30, this.scale * 40)}px;
+            font-size:${Math.max(
+              30,
+              this.scale * 40
+            )}px;
             background:repeating-linear-gradient(
               45deg,
               white,
@@ -294,6 +403,7 @@ export class Race {
       </div>
 
       <!-- HUD -->
+
       <div style="
         position:absolute;
         bottom:0;
@@ -307,6 +417,7 @@ export class Race {
       ">
 
         <!-- QUESTION -->
+
         <h1 id="qbox" style="
           margin:0 0 25px 0;
           font-size:clamp(28px,5vw,60px);
@@ -320,6 +431,7 @@ export class Race {
         "></h1>
 
         <!-- ANSWERS -->
+
         <div id="options" style="
           display:flex;
           justify-content:center;
@@ -330,6 +442,7 @@ export class Race {
       </div>
 
       <!-- BOOST MESSAGE -->
+
       <div id="boostMessage" style="
         position:absolute;
         top:12%;
@@ -352,9 +465,9 @@ export class Race {
 
     root.appendChild(container);
 
-    // -------------------
+    // =====================================================
     // ELEMENTS
-    // -------------------
+    // =====================================================
 
     this.el = {
       world: container.querySelector("#world"),
@@ -364,12 +477,13 @@ export class Race {
       ai3: container.querySelector("#ai3"),
       qbox: container.querySelector("#qbox"),
       options: container.querySelector("#options"),
-      boostMessage: container.querySelector("#boostMessage"),
+      boostMessage:
+        container.querySelector("#boostMessage"),
     };
 
-    // -------------------
+    // =====================================================
     // STYLE CARS
-    // -------------------
+    // =====================================================
 
     [
       this.el.player,
@@ -379,39 +493,49 @@ export class Race {
     ].forEach((car) => {
       car.style.position = "absolute";
 
-      car.style.width = this.carWidth + "px";
-      car.style.height = this.carHeight + "px";
+      car.style.width =
+        this.carWidth + "px";
+
+      car.style.height =
+        this.carHeight + "px";
 
       car.style.objectFit = "contain";
 
       car.style.transform =
         "translate(-50%, -50%) rotate(90deg)";
 
-      car.style.transformOrigin = "center center";
+      car.style.transformOrigin =
+        "center center";
 
       car.style.userSelect = "none";
 
       car.draggable = false;
     });
 
-    // -------------------
+    // =====================================================
     // FIRST QUESTION
-    // -------------------
+    // =====================================================
 
     this.nextQuestion();
 
-    // -------------------
+    // =====================================================
     // COUNTDOWN
-    // -------------------
+    // =====================================================
 
     this.startCountdown(() => {
-      this.stats.startTime = Date.now();
+      this.stats.startTime =
+        Date.now();
 
-      // Set the first AI boost based on difficulty.
-      if (this.difficulty === "hard") {
-        this.aiNextBoost = Date.now() + 3000;
-      } else if (this.difficulty === "medium") {
-        this.aiNextBoost = Date.now() + 6000;
+      // Recalculate AI boost timing
+      // after countdown finishes.
+
+      if (this.settings.aiBoostEnabled) {
+        this.aiNextBoost =
+          Date.now() +
+          this.randomBetween(
+            this.settings.aiBoostMinDelay,
+            this.settings.aiBoostMaxDelay
+          );
       } else {
         this.aiNextBoost = Infinity;
       }
@@ -419,40 +543,45 @@ export class Race {
       this.loop();
     });
 
-    // -------------------
+    // =====================================================
     // RESIZE
-    // -------------------
+    // =====================================================
 
-    window.addEventListener("resize", () => {
-      this.scale = Math.min(
-        window.innerWidth / 1400,
-        1
-      );
+    window.addEventListener(
+      "resize",
+      () => {
+        this.scale =
+          Math.min(
+            window.innerWidth / 1400,
+            1
+          );
 
-      this.carWidth = Math.max(
-        40,
-        Math.min(
-          65,
-          window.innerWidth * 0.045
-        )
-      );
+        this.carWidth =
+          Math.max(
+            40,
+            Math.min(
+              65,
+              window.innerWidth * 0.045
+            )
+          );
 
-      this.carHeight =
-        this.carWidth * 1.6;
+        this.carHeight =
+          this.carWidth * 1.6;
 
-      [
-        this.el.player,
-        this.el.ai1,
-        this.el.ai2,
-        this.el.ai3,
-      ].forEach((car) => {
-        car.style.width =
-          this.carWidth + "px";
+        [
+          this.el.player,
+          this.el.ai1,
+          this.el.ai2,
+          this.el.ai3,
+        ].forEach((car) => {
+          car.style.width =
+            this.carWidth + "px";
 
-        car.style.height =
-          this.carHeight + "px";
-      });
-    });
+          car.style.height =
+            this.carHeight + "px";
+        });
+      }
+    );
   }
 
   // =====================================================
@@ -460,43 +589,66 @@ export class Race {
   // =====================================================
 
   startCountdown(callback) {
-    const overlay = document.createElement("div");
+    const overlay =
+      document.createElement("div");
 
-    overlay.style.position = "absolute";
+    overlay.style.position =
+      "absolute";
+
     overlay.style.top = "0";
     overlay.style.left = "0";
+
     overlay.style.width = "100vw";
     overlay.style.height = "100vh";
-    overlay.style.display = "flex";
-    overlay.style.alignItems = "center";
-    overlay.style.justifyContent = "center";
+
+    overlay.style.display =
+      "flex";
+
+    overlay.style.alignItems =
+      "center";
+
+    overlay.style.justifyContent =
+      "center";
+
     overlay.style.fontSize =
       "clamp(70px,18vw,140px)";
-    overlay.style.fontWeight = "900";
-    overlay.style.color = "white";
+
+    overlay.style.fontWeight =
+      "900";
+
+    overlay.style.color =
+      "white";
+
     overlay.style.background =
       "rgba(0,0,0,0.6)";
-    overlay.style.zIndex = "999";
 
-    document.body.appendChild(overlay);
+    overlay.style.zIndex =
+      "999";
+
+    document.body.appendChild(
+      overlay
+    );
 
     let count = 3;
 
-    const interval = setInterval(() => {
-      if (count > 0) {
-        overlay.innerText = count;
-      } else if (count === 0) {
-        overlay.innerText = "GO!";
-      } else {
-        clearInterval(interval);
+    const interval =
+      setInterval(() => {
+        if (count > 0) {
+          overlay.innerText =
+            count;
+        } else if (count === 0) {
+          overlay.innerText =
+            "GO!";
+        } else {
+          clearInterval(interval);
 
-        overlay.remove();
+          overlay.remove();
 
-        callback();
-      }
+          callback();
+        }
 
-      count--;
-    }, 1000);
+        count--;
+      }, 1000);
   }
 
   // =====================================================
@@ -524,30 +676,31 @@ export class Race {
 
     const now = Date.now();
 
-    // -------------------
+    // ===================================================
     // MOVE
-    // -------------------
+    // ===================================================
 
     this.move(this.cars.player);
+
     this.move(this.cars.ai1);
     this.move(this.cars.ai2);
     this.move(this.cars.ai3);
 
-    // -------------------
+    // ===================================================
     // START AI BOOST
-    // -------------------
+    // ===================================================
 
     if (
-      this.difficulty !== "easy" &&
+      this.settings.aiBoostEnabled &&
       !this.activeAIBoost &&
       now >= this.aiNextBoost
     ) {
       this.startAIBoost(now);
     }
 
-    // -------------------
+    // ===================================================
     // END AI BOOST
-    // -------------------
+    // ===================================================
 
     if (
       this.activeAIBoost &&
@@ -555,6 +708,8 @@ export class Race {
     ) {
       const aiName =
         this.activeAIBoost;
+
+      // Return to normal speed.
 
       this.cars[aiName].speed =
         this.aiStats[aiName].baseSpeed;
@@ -564,27 +719,24 @@ export class Race {
 
       this.hideBoostMessage();
 
-      // Schedule next boost according to difficulty.
-      if (this.difficulty === "hard") {
-        // Hard: 5–8 seconds
+      // Schedule another boost.
+
+      if (this.settings.aiBoostEnabled) {
         this.aiNextBoost =
           now +
-          5000 +
-          Math.random() * 3000;
-      } else if (this.difficulty === "medium") {
-        // Medium: 8–12 seconds
-        this.aiNextBoost =
-          now +
-          8000 +
-          Math.random() * 4000;
+          this.randomBetween(
+            this.settings.aiBoostMinDelay,
+            this.settings.aiBoostMaxDelay
+          );
       } else {
-        this.aiNextBoost = Infinity;
+        this.aiNextBoost =
+          Infinity;
       }
     }
 
-    // -------------------
+    // ===================================================
     // END PLAYER BOOST
-    // -------------------
+    // ===================================================
 
     if (
       this.playerBoostUntil &&
@@ -596,16 +748,17 @@ export class Race {
       this.playerBoostUntil = 0;
     }
 
-    // -------------------
+    // ===================================================
     // RENDER
-    // -------------------
+    // ===================================================
 
     this.renderPositions();
+
     this.renderCamera();
 
-    // -------------------
+    // ===================================================
     // WIN CHECK
-    // -------------------
+    // ===================================================
 
     this.checkWin();
   }
@@ -621,52 +774,43 @@ export class Race {
       "ai3",
     ];
 
-    // Pick random AI.
+    // Choose a random AI.
+
     const chosenAI =
       aiNames[
         Math.floor(
           Math.random() *
-            aiNames.length
+          aiNames.length
         )
       ];
 
-    this.activeAIBoost = chosenAI;
+    this.activeAIBoost =
+      chosenAI;
 
-    let boostSpeed;
-    let duration;
+    const baseSpeed =
+      this.aiStats[
+        chosenAI
+      ].baseSpeed;
 
-    // -------------------
-    // HARD
-    // -------------------
+    // ===================================================
+    // BOOST AMOUNT
+    // ===================================================
 
-    if (this.difficulty === "hard") {
-      boostSpeed =
-        this.aiStats[chosenAI].boostSpeed;
+    const boostSpeed =
+      baseSpeed +
+      this.settings.aiBoostAmount;
 
-      // 2–4 seconds
-      duration =
-        2000 +
-        Math.random() * 2000;
-    }
+    // ===================================================
+    // BOOST DURATION
+    // ===================================================
 
-    // -------------------
-    // MEDIUM
-    // -------------------
+    const duration =
+      this.randomBetween(
+        this.settings.aiBoostDurationMin,
+        this.settings.aiBoostDurationMax
+      );
 
-    else {
-      // Medium gets a smaller boost.
-      boostSpeed =
-        this.aiStats[chosenAI].baseSpeed +
-        (
-          this.aiStats[chosenAI].boostSpeed -
-          this.aiStats[chosenAI].baseSpeed
-        ) * 0.55;
-
-      // 1.5–2.5 seconds
-      duration =
-        1500 +
-        Math.random() * 1000;
-    }
+    // Apply boost.
 
     this.cars[chosenAI].speed =
       boostSpeed;
@@ -684,11 +828,15 @@ export class Race {
   // =====================================================
 
   showBoostMessage(text) {
-    if (!this.el.boostMessage) return;
+    if (!this.el.boostMessage) {
+      return;
+    }
 
-    this.el.boostMessage.innerText = text;
+    this.el.boostMessage.innerText =
+      text;
 
-    this.el.boostMessage.style.opacity = "1";
+    this.el.boostMessage.style.opacity =
+      "1";
 
     clearTimeout(
       this.boostMessageTimer
@@ -701,9 +849,12 @@ export class Race {
   }
 
   hideBoostMessage() {
-    if (!this.el.boostMessage) return;
+    if (!this.el.boostMessage) {
+      return;
+    }
 
-    this.el.boostMessage.style.opacity = "0";
+    this.el.boostMessage.style.opacity =
+      "0";
   }
 
   // =====================================================
@@ -771,56 +922,75 @@ export class Race {
     this.el.qbox.innerText =
       `${this.question.question} = ?`;
 
-    this.el.options.innerHTML = "";
+    this.el.options.innerHTML =
+      "";
 
-    this.question.options.forEach((opt) => {
-      const btn =
-        document.createElement("button");
+    this.question.options.forEach(
+      (opt) => {
+        const btn =
+          document.createElement(
+            "button"
+          );
 
-      btn.innerText = opt;
+        btn.innerText = opt;
 
-      btn.style.width =
-        "clamp(80px,18vw,150px)";
+        btn.style.width =
+          "clamp(80px,18vw,150px)";
 
-      btn.style.height =
-        "clamp(50px,8vw,75px)";
+        btn.style.height =
+          "clamp(50px,8vw,75px)";
 
-      btn.style.margin = "8px";
+        btn.style.margin =
+          "8px";
 
-      btn.style.fontSize =
-        "clamp(20px,3vw,30px)";
+        btn.style.fontSize =
+          "clamp(20px,3vw,30px)";
 
-      btn.style.fontWeight = "bold";
+        btn.style.fontWeight =
+          "bold";
 
-      btn.style.border = "none";
+        btn.style.border =
+          "none";
 
-      btn.style.borderRadius = "15px";
+        btn.style.borderRadius =
+          "15px";
 
-      btn.style.background = "#2196F3";
+        btn.style.background =
+          "#2196F3";
 
-      btn.style.color = "white";
+        btn.style.color =
+          "white";
 
-      btn.style.cursor = "pointer";
+        btn.style.cursor =
+          "pointer";
 
-      btn.style.transition = "0.2s";
+        btn.style.transition =
+          "0.2s";
 
-      btn.onmouseenter = () => {
-        btn.style.transform =
-          "scale(1.08)";
-      };
+        btn.onmouseenter = () => {
+          btn.style.transform =
+            "scale(1.08)";
+        };
 
-      btn.onmouseleave = () => {
-        btn.style.transform =
-          "scale(1)";
-      };
+        btn.onmouseleave = () => {
+          btn.style.transform =
+            "scale(1)";
+        };
 
-      btn.onclick = () =>
-        this.answer(opt);
+        btn.onclick = () =>
+          this.answer(opt);
 
-      this.el.options.appendChild(btn);
-    });
+        this.el.options.appendChild(
+          btn
+        );
+      }
+    );
 
-    // Start reaction timer.
+    // Reaction timer is used only
+    // to calculate boost strength.
+    //
+    // There is NO question timeout.
+
     this.questionStartTime =
       Date.now();
   }
@@ -830,17 +1000,22 @@ export class Race {
   // =====================================================
 
   answer(val) {
-    if (this.gameOver) return;
+    if (this.gameOver) {
+      return;
+    }
 
     // Prevent multiple clicks.
+
     const buttons =
       this.el.options.querySelectorAll(
         "button"
       );
 
-    buttons.forEach((button) => {
-      button.disabled = true;
-    });
+    buttons.forEach(
+      (button) => {
+        button.disabled = true;
+      }
+    );
 
     const reactionTime =
       (Date.now() -
@@ -856,84 +1031,195 @@ export class Race {
     ) {
       this.stats.correct++;
 
-      let boostAmount;
-      let duration;
+      // =================================================
+      // EASY
+      // =================================================
 
-      // UNDER 1 SECOND
-      if (reactionTime <= 1) {
-        boostAmount =
-          this.playerBoost * 1.0;
+      if (
+        this.difficulty === "easy"
+      ) {
+        // Easy has no time pressure.
+        // Every correct answer gets
+        // a useful player boost.
 
-        duration = 1000;
+        const boostAmount =
+          0.85;
+
+        const duration =
+          850;
+
+        this.cars.player.speed =
+          this.playerBaseSpeed +
+          boostAmount;
+
+        this.playerBoostUntil =
+          Date.now() +
+          duration;
+
+        this.showBoostMessage(
+          `⚡ +${boostAmount.toFixed(
+            1
+          )} SPEED`
+        );
       }
 
-      // 1–2 SECONDS
-      else if (reactionTime <= 2) {
-        boostAmount =
-          this.playerBoost * 0.82;
+      // =================================================
+      // MEDIUM
+      // =================================================
 
-        duration = 900;
+      else if (
+        this.difficulty ===
+        "medium"
+      ) {
+        let boostAmount;
+        let duration;
+
+        if (reactionTime <= 1) {
+          boostAmount = 1.0;
+          duration = 850;
+        } else if (
+          reactionTime <= 2
+        ) {
+          boostAmount = 0.8;
+          duration = 750;
+        } else if (
+          reactionTime <= 3
+        ) {
+          boostAmount = 0.6;
+          duration = 650;
+        } else {
+          boostAmount = 0.4;
+          duration = 550;
+        }
+
+        this.cars.player.speed =
+          this.playerBaseSpeed +
+          boostAmount;
+
+        this.playerBoostUntil =
+          Date.now() +
+          duration;
+
+        this.showBoostMessage(
+          `⚡ +${boostAmount.toFixed(
+            1
+          )} SPEED`
+        );
       }
 
-      // 2–3 SECONDS
-      else if (reactionTime <= 3) {
-        boostAmount =
-          this.playerBoost * 0.65;
+      // =================================================
+      // HARD
+      // =================================================
 
-        duration = 800;
-      }
-
-      // 3–5 SECONDS
-      else if (reactionTime <= 5) {
-        boostAmount =
-          this.playerBoost * 0.40;
-
-        duration = 650;
-      }
-
-      // OVER 5 SECONDS
       else {
-        boostAmount =
-          this.playerBoost * 0.15;
+        let boostAmount;
+        let duration;
 
-        duration = 450;
+        // VERY FAST ANSWER
+
+        if (reactionTime <= 0.75) {
+          boostAmount = 1.35;
+          duration = 950;
+        }
+
+        // FAST ANSWER
+
+        else if (
+          reactionTime <= 1.25
+        ) {
+          boostAmount = 1.15;
+          duration = 850;
+        }
+
+        // NORMAL ANSWER
+
+        else if (
+          reactionTime <= 2
+        ) {
+          boostAmount = 0.9;
+          duration = 750;
+        }
+
+        // SLOW ANSWER
+
+        else if (
+          reactionTime <= 3
+        ) {
+          boostAmount = 0.65;
+          duration = 650;
+        }
+
+        // VERY SLOW ANSWER
+
+        else {
+          boostAmount = 0.4;
+          duration = 500;
+        }
+
+        this.cars.player.speed =
+          this.playerBaseSpeed +
+          boostAmount;
+
+        this.playerBoostUntil =
+          Date.now() +
+          duration;
+
+        this.showBoostMessage(
+          `⚡ +${boostAmount.toFixed(
+            1
+          )} SPEED`
+        );
       }
-
-      // Apply player boost.
-      this.cars.player.speed =
-        this.playerBaseSpeed +
-        boostAmount;
-
-      this.playerBoostUntil =
-        Date.now() + duration;
-
-      this.showBoostMessage(
-        `⚡ +${boostAmount.toFixed(1)} SPEED`
-      );
     }
 
     // ===================================================
-    // WRONG
+    // WRONG ANSWER
     // ===================================================
 
     else {
       this.stats.wrong++;
 
-      this.cars.player.speed =
-        Math.max(
-          1.0,
-          this.playerBaseSpeed - 0.6
+      // =================================================
+      // EASY
+      // =================================================
+
+      if (
+        this.difficulty === "easy"
+      ) {
+        // NO SLOWDOWN.
+
+        this.showBoostMessage(
+          "❌ WRONG!"
         );
+      }
 
-      this.playerBoostUntil =
-        Date.now() + 700;
+      // =================================================
+      // MEDIUM + HARD
+      // =================================================
 
-      this.showBoostMessage(
-        "❌ WRONG! - SPEED"
-      );
+      else {
+        // Small temporary slowdown.
+
+        this.cars.player.speed =
+          Math.max(
+            1.25,
+            this.playerBaseSpeed -
+              0.55
+          );
+
+        this.playerBoostUntil =
+          Date.now() + 650;
+
+        this.showBoostMessage(
+          "❌ WRONG! - SPEED"
+        );
+      }
     }
 
-    // Next question.
+    // ===================================================
+    // NEXT QUESTION
+    // ===================================================
+
     this.nextQuestion();
   }
 
@@ -942,31 +1228,37 @@ export class Race {
   // =====================================================
 
   checkWin() {
-    if (this.gameOver) return;
+    if (this.gameOver) {
+      return;
+    }
 
     const win = (text) => {
       this.gameOver = true;
 
-      const timeTaken = (
-        (Date.now() -
-          this.stats.startTime) /
-        1000
-      ).toFixed(1);
+      const timeTaken =
+        (
+          (Date.now() -
+            this.stats.startTime) /
+          1000
+        ).toFixed(1);
 
       const total =
         this.stats.correct +
         this.stats.wrong;
 
-      const accuracy = total
-        ? Math.round(
-            (this.stats.correct /
-              total) *
-            100
-          )
-        : 0;
+      const accuracy =
+        total
+          ? Math.round(
+              (this.stats.correct /
+                total) *
+                100
+            )
+          : 0;
 
       const endScreen =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
       endScreen.style.position =
         "absolute";
@@ -975,9 +1267,11 @@ export class Race {
 
       endScreen.style.left = "0";
 
-      endScreen.style.width = "100vw";
+      endScreen.style.width =
+        "100vw";
 
-      endScreen.style.height = "100vh";
+      endScreen.style.height =
+        "100vh";
 
       endScreen.style.background =
         "#000";
@@ -1011,15 +1305,18 @@ export class Race {
         </p>
 
         <p>
-          ✅ Correct: ${this.stats.correct}
+          ✅ Correct:
+          ${this.stats.correct}
         </p>
 
         <p>
-          ❌ Wrong: ${this.stats.wrong}
+          ❌ Wrong:
+          ${this.stats.wrong}
         </p>
 
         <p>
-          🎯 Accuracy: ${accuracy}%
+          🎯 Accuracy:
+          ${accuracy}%
         </p>
 
         <button
@@ -1043,9 +1340,9 @@ export class Race {
       );
     };
 
-    // -------------------
+    // ===================================================
     // PLAYER WINS
-    // -------------------
+    // ===================================================
 
     if (
       this.cars.player.x >=
@@ -1055,9 +1352,9 @@ export class Race {
       return;
     }
 
-    // -------------------
+    // ===================================================
     // AI WINS
-    // -------------------
+    // ===================================================
 
     if (
       this.cars.ai1.x >=
